@@ -1,38 +1,76 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
-#include <algorithm>
 
 using namespace std;
 
-int checkBoard(string b) {
+// atualiza a matriz do quadro do jogo
+void executeMove(char aux_board[][3], int choice, char player_symbol) {
+    switch (choice) {
+        case 1: aux_board[0][0] = player_symbol; break;
+        case 2: aux_board[0][1] = player_symbol; break;
+        case 3: aux_board[0][2] = player_symbol; break;
+        case 4: aux_board[1][0] = player_symbol; break;
+        case 5: aux_board[1][1] = player_symbol; break;
+        case 6: aux_board[1][2] = player_symbol; break;
+        case 7: aux_board[2][0] = player_symbol; break;
+        case 8: aux_board[2][1] = player_symbol; break;
+        case 9: aux_board[2][2] = player_symbol; break;
+    }
+}
+
+int easyMove(char aux_board[][3], string game_board) {
+    int position;
+    char choice;
+    do {
+        choice = rand() % 9 + 1 + '0';
+        position = game_board.find(choice);
+    } while (position < 0);
+    executeMove(aux_board, choice, 'O');
+    return position;
+}
+
+void averageMove(char aux_board[][3]) {
+}
+
+void perfectMove(char aux_board[][3]) {
+}
+
+// verifica a situação do jogo
+int checkBoard(char b[][3]) {
     char winner;
+    // verifica se o quadro está completo
+    bool board_full = true;
+    for (int i=0; i<3; i++)
+        for (int j=0; j<3; j++)
+            if (b[i][j] == '0')
+                board_full = false;
 
     // verificação horizontal
-    if (b[0] == b[1] && b[1] == b[2]) {
-        winner = b[0];
-    } else if (b[3] == b[4] && b[4] == b[5]) {
-        winner = b[3];
-    } else if (b[6] == b[7] && b[7] == b[8]) {
-        winner = b[6];
+    if (b[0][0] == b[0][1] && b[0][1] == b[0][2]) {
+        winner = b[0][0];
+    } else if (b[1][0] == b[1][1] && b[1][1] == b[1][2]) {
+        winner = b[1][0];
+    } else if (b[2][0] == b[2][1] && b[2][1] == b[2][2]) {
+        winner = b[2][0];
     } 
     // verificação vertical
-    else if (b[0] == b[3] && b[3] == b[6]) {
-        winner = b[0];
-    } else if (b[1] == b[4] && b[4] == b[7]) {
-        winner = b[1];
-    } else if (b[2] == b[5] && b[5] == b[8]) {
-        winner = b[2];
+    else if (b[0][0] == b[1][0] && b[1][0] == b[2][0]) {
+        winner = b[0][0];
+    } else if (b[0][1] == b[1][1] && b[1][1] == b[2][1]) {
+        winner = b[0][1];
+    } else if (b[0][2] == b[1][2] && b[1][2] == b[2][2]) {
+        winner = b[0][2];
     }
     // verificação diagonal
-    else if (b[0] == b[4] && b[4] == b[8]) {
-        winner = b[0];
+    else if (b[0][0] == b[1][1] && b[1][1] == b[2][2]) {
+        winner = b[0][0];
     }
-    else if (b[2] == b[4] && b[4] == b[6]) {
-        winner = b[2];
+    else if (b[0][2] == b[1][1] && b[1][1] == b[2][0]) {
+        winner = b[0][2];
     } 
     // verifica se todos os campos ja foram marcados
-    else if (b.find('0') > 8) {
+    else if (board_full) {
         winner = 'E'; // empate
     }
     // caso chegue aqui, o jogo continua...
@@ -43,59 +81,101 @@ int checkBoard(string b) {
     return winner;
 }
 
-void playSoloGame(int level) {
-
+string generateBoard() {
+    string game_board = "\t    _________________ \n\t   |     |     |     |\n\t   |  1  |  2  |  3  |\n\t   |_____|_____|_____|\n";
+    game_board += "\t   |     |     |     |\n\t   |  4  |  5  |  6  |\n\t   |_____|_____|_____|\n";
+    game_board += "\t   |     |     |     |\n\t   |  7  |  8  |  9  |\n\t   |_____|_____|_____|\n\n\n";
+    return game_board;
 }
 
-void playMultiplayerGame() {
+void playGame(int level) {
     // inicializa algumas variáveis
-    string header = "\tÉ a vez do Jogador 1\n\n";
-    string game_board = "\t _________________ \n\t|     |     |     |\n\t|  1  |  2  |  3  |\n\t|_____|_____|_____|\n";
-    game_board += "\t|     |     |     |\n\t|  4  |  5  |  6  |\n\t|_____|_____|_____|\n";
-    game_board += "\t|     |     |     |\n\t|  7  |  8  |  9  |\n\t|_____|_____|_____|\n\n\n";
-    string question = "\tEscolha um numero para marcar: ";
+
+    string header; // verifica o tipo de jogo
+    if (level == 0) header = "\t   É a vez do Jogador 1\n\n";
+    else header = "\t       É a sua vez!\n\n";
+    string game_board = generateBoard();
+    string question = "\tEscolha um número para marcar: ";
+
     // variáveis de controle
     int current_player = 1; // para verificar quem está jogando 
     char player_symbol = 'X'; // e qual o simbolo dele
-    string aux_board = "000000000";
+    
+    // matriz simbólica do tabuleiro
+    char aux_board[3][3];
+    aux_board[0][0] = '0';aux_board[0][1] = '0';aux_board[0][2] = '0';
+    aux_board[1][0] = '0';aux_board[1][1] = '0';aux_board[1][2] = '0';
+    aux_board[2][0] = '0';aux_board[2][1] = '0';aux_board[2][2] = '0';
     bool game_ended = false;
-    char choice;
+    
     // repita enquanto o jogo não terminou
     do {
         cout<<header;
         cout<<game_board;
         cout<<question;
+        char choice;
         cin>>choice;
+
+        // verifica se a posição escolhida está disponível
+        // se estiver reproduz a jogada, se não emite um aviso
         int position = game_board.find(choice);
         if (position > 0) {
             game_board[position] = player_symbol;
-            // quadro auxiliar para facilitar a checkagem
-            aux_board[choice-'0'-1] = player_symbol; // choice-'0' faz um cast de char pra int.
-            if (checkBoard(aux_board) == 'X') { // player 1 venceu
+
+            // executa a jogada
+            executeMove(aux_board, choice-'0', player_symbol);
+
+            // verifica se alguém ganhou ou se acabaram as jogadas
+            char winner = checkBoard(aux_board);
+            if (winner == 'X') { // player 1 venceu
                 game_ended = true;
+                system("clear || cls");
                 cout<<"\n\t*************************\n\t* VITÓRIA DO JOGADOR 1! *\n\t*************************\n\n";
-            } else if (checkBoard(aux_board) == 'O') { // player 2 venceu
+                cout<<game_board;
+                break;
+            } else if (winner == 'O') { // player 2 venceu
                 game_ended = true;
+                system("clear || cls");
                 cout<<"\n\t*************************\n\t* VITÓRIA DO JOGADOR 2! *\n\t*************************\n\n";
-            } else if (checkBoard(aux_board) == 'E') { // empatou
+                cout<<game_board;
+                break;
+            } else if (winner == 'E') { // empatou
                 game_ended = true;
+                system("clear || cls");
                 cout<<"\n\t*************************\n\t*        EMPATOU!       *\n\t*************************\n\n";
+                cout<<game_board;
+                break;
             } else {
-                system("clear || cls");// else não terminou ainda, não há o que fazer
+                // não terminou ainda, simplesmente limpa a tela
+                // e prossegue para a próxima rodada
+                system("clear || cls");
+            }
+
+            // atualiza as variáveis do próximo player
+            if (level == 0) { // se for multiplayer troca o jogador
+                if (current_player == 1) {
+                    current_player = 2;
+                    player_symbol = 'O';
+                    header[header.find('1')] = '2';
+                } else {
+                    current_player = 1;
+                    player_symbol = 'X';
+                    header[header.find('2')] = '1';
+                }
+            } else {
+                switch (level) {
+                    case 1: 
+                        game_board[easyMove(aux_board, game_board)] = 'O';
+                        break;
+                    case 2: averageMove(aux_board); break;
+                    case 3: perfectMove(aux_board); break;
+                }
             }
         } else {
-            cout<<"*** Opção inválida, tente escolher um quadro que ainda não foi marcado! ***\n";
+            system("clear || cls");
+            cout<<"\n*** Opção inválida, tente escolher um quadro que ainda não foi marcado! ***\n\n";
         }
-        // atualiza as variáveis do próximo player
-        if (current_player == 1) {
-            current_player = 2;
-            player_symbol = 'O';
-            header[header.find('1')] = '2';
-        } else {
-            current_player = 1;
-            player_symbol = 'X';
-            header[header.find('2')] = '1';
-        }
+        
     } while(!game_ended);
 }
 
@@ -123,10 +203,10 @@ void showMenu() {
                 cin>>level;
                 system("clear || cls");
             } while(level < 1 || level > 3);
-            playSoloGame(level);
+            playGame(level);
             break;
         case 2:
-            playMultiplayerGame();
+            playGame(0);
             break;
         default:
             break;
