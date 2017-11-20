@@ -1,8 +1,15 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 using namespace std;
+
+int getPosition (int position, string game_board) {
+    int choice = position + '0';
+    position = game_board.find(choice);
+    return position;
+}
 
 // atualiza a matriz do quadro do jogo
 void executeMove(char aux_board[][3], int choice, char player_symbol) {
@@ -22,6 +29,7 @@ void executeMove(char aux_board[][3], int choice, char player_symbol) {
 int easyMove(char aux_board[][3], string game_board) {
     int position;
     char choice;
+    // executa até que seja gerada uma posição válida
     do {
         choice = rand() % 9 + 1 + '0';
         position = game_board.find(choice);
@@ -30,10 +38,159 @@ int easyMove(char aux_board[][3], string game_board) {
     return position;
 }
 
-void averageMove(char aux_board[][3]) {
+// verifica perigo de vitória/derrota
+int * checkDanger(char b[][3], string gb) {
+    int * position = new int[2];
+    position[0] = 0;
+
+    // verificação horizontal
+    // linha 1
+    if (b[0][1] == b[0][2]) {
+        position[0] = 1;
+        position[1] = gb.find(1 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][0] == b[0][2]) {
+        position[0] = 2;
+        position[1] = gb.find(2 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][0] == b[0][1]) {
+        position[0] = 3;
+        position[1] = gb.find(3 + '0');
+        if (position[1] > 0) return position;
+    }
+    // linha 2
+    else if (b[1][1] == b[1][2]) {
+        position[0] = 4;
+        position[1] = gb.find(4 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[1][0] == b[1][2]) {
+        position[0] = 5;
+        position[1] = gb.find(5 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[1][0] == b[1][1]) {
+        position[0] = 6;
+        position[1] = gb.find(6 + '0');
+        if (position[1] > 0) return position;
+    }
+    // linha 3
+    else if (b[2][1] == b[2][2]) {
+        position[0] = 7;
+        position[1] = gb.find(7 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[2][0] == b[2][2]) {
+        position[0] = 8;
+        position[1] = gb.find(8 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[2][0] == b[2][1]) {
+        position[0] = 9;
+        position[1] = gb.find(9 + '0');
+        if (position[1] > 0) return position;
+    }
+    // verificação vertical
+    // coluna 1
+    else if (b[1][0] == b[2][0]) {
+        position[0] = 1;
+        position[1] = gb.find(1 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][0] == b[2][0]) {
+        position[0] = 4;
+        position[1] = gb.find(4 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][0] == b[1][0]) {
+        position[0] = 7;
+        position[1] = gb.find(7 + '0');
+        if (position[1] > 0) return position;
+    }
+    /// coluna 2
+    else if (b[1][1] == b[2][1]) {
+        position[0] = 2;
+        position[1] = gb.find(2 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][1] == b[2][1]) {
+        position[0] = 5;
+        position[1] = gb.find(5 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][1] == b[1][1]) {
+        position[0] = 8;
+        position[1] = gb.find(8 + '0');
+        if (position[1] > 0) return position;
+    }
+    /// coluna 3
+    else if (b[1][2] == b[2][2]) {
+        position[0] = 3;
+        position[1] = gb.find(3 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][2] == b[2][2]) {
+        position[0] = 6;
+        position[1] = gb.find(6 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][2] == b[1][2]) {
+        position[0] = 9;
+        position[1] = gb.find(9 + '0');
+        if (position[1] > 0) return position;
+    }
+    // verificação na diagonal
+    // principal
+    else if (b[1][1] == b[2][2]) {
+        position[0] = 1;
+        position[1] = gb.find(1 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][0] == b[2][2]) {
+        position[0] = 5;
+        position[1] = gb.find(5 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][0] == b[1][1]) {
+        position[0] = 9;
+        position[1] = gb.find(9 + '0');
+        if (position[1] > 0) return position;
+    }
+    // secundaria
+    else if (b[1][1] == b[2][0]) {
+        position[0] = 3;
+        position[1] = gb.find(3 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][2] == b[2][0]) {
+        position[0] = 5;
+        position[1] = gb.find(5 + '0');
+        if (position[1] > 0) return position;
+    }
+    else if (b[0][2] == b[1][1]) {
+        position[0] = 7;
+        position[1] = gb.find(7 + '0');
+        if (position[1] > 0) return position;
+    }
+    else return position;
 }
 
-void perfectMove(char aux_board[][3]) {
+int averageMove(char b[][3], string game_board) {
+
+    int * position = checkDanger(b, game_board);
+    int choice;
+    cout<<"Choice: "<<position[0]<<"\nPosition: "<<position[1]<<endl;
+
+    if (position[0] == 0) { // sem perigo de derrota/vitória
+        cout<<"No Danger"<<endl;
+        position[1] = easyMove(b, game_board);
+    } else {
+        cout<<"DANGER!!"<<endl;
+        executeMove(b, position[0], 'O');
+    }
+    return position[1];
 }
 
 // verifica a situação do jogo
@@ -41,10 +198,13 @@ int checkBoard(char b[][3]) {
     char winner;
     // verifica se o quadro está completo
     bool board_full = true;
-    for (int i=0; i<3; i++)
-        for (int j=0; j<3; j++)
-            if (b[i][j] == '0')
+    for (int i=0; i<3; i++){
+        for (int j=0; j<3; j++){
+            int aux = b[i][j] - '0';
+            if (aux > 0 && aux < 10)
                 board_full = false;
+        }
+    }
 
     // verificação horizontal
     if (b[0][0] == b[0][1] && b[0][1] == b[0][2]) {
@@ -103,9 +263,9 @@ void playGame(int level) {
     
     // matriz simbólica do tabuleiro
     char aux_board[3][3];
-    aux_board[0][0] = '0';aux_board[0][1] = '0';aux_board[0][2] = '0';
-    aux_board[1][0] = '0';aux_board[1][1] = '0';aux_board[1][2] = '0';
-    aux_board[2][0] = '0';aux_board[2][1] = '0';aux_board[2][2] = '0';
+    aux_board[0][0] = '1';aux_board[0][1] = '2';aux_board[0][2] = '3';
+    aux_board[1][0] = '4';aux_board[1][1] = '5';aux_board[1][2] = '6';
+    aux_board[2][0] = '7';aux_board[2][1] = '8';aux_board[2][2] = '9';
     bool game_ended = false;
     
     // repita enquanto o jogo não terminou
@@ -167,8 +327,12 @@ void playGame(int level) {
                     case 1: 
                         game_board[easyMove(aux_board, game_board)] = 'O';
                         break;
-                    case 2: averageMove(aux_board); break;
-                    case 3: perfectMove(aux_board); break;
+                    case 2: 
+                        game_board[averageMove(aux_board, game_board)] = 'O';
+                        break;
+                    case 3: 
+                        //game_board[perfectMove(aux_board, game_board)] = 'O';
+                        break;
                 }
             }
         } else {
