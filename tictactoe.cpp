@@ -5,12 +5,6 @@
 
 using namespace std;
 
-int getPosition (int position, string game_board) {
-    int choice = position + '0';
-    position = game_board.find(choice);
-    return position;
-}
-
 // atualiza a matriz do quadro do jogo
 void executeMove(char aux_board[][3], int choice, char player_symbol) {
     switch (choice) {
@@ -34,15 +28,14 @@ int easyMove(char aux_board[][3], string game_board) {
         choice = rand() % 9 + 1 + '0';
         position = game_board.find(choice);
     } while (position < 0);
-    executeMove(aux_board, choice, 'O');
+    executeMove(aux_board, choice - '0', 'O');
     return position;
 }
 
 // verifica perigo de vitória/derrota
-int * checkDanger(char b[][3], string gb) {
-    int * position = new int[2];
-    position[0] = 0;
+int * checkDanger(char b[][3], string gb) { // b ~ aux_board; gb ~ game_board
 
+    int * position = new int[2];
     // verificação horizontal
     // linha 1
     if (b[0][1] == b[0][2]) {
@@ -61,7 +54,7 @@ int * checkDanger(char b[][3], string gb) {
         if (position[1] > 0) return position;
     }
     // linha 2
-    else if (b[1][1] == b[1][2]) {
+    if (b[1][1] == b[1][2]) {
         position[0] = 4;
         position[1] = gb.find(4 + '0');
         if (position[1] > 0) return position;
@@ -77,7 +70,7 @@ int * checkDanger(char b[][3], string gb) {
         if (position[1] > 0) return position;
     }
     // linha 3
-    else if (b[2][1] == b[2][2]) {
+    if (b[2][1] == b[2][2]) {
         position[0] = 7;
         position[1] = gb.find(7 + '0');
         if (position[1] > 0) return position;
@@ -94,7 +87,7 @@ int * checkDanger(char b[][3], string gb) {
     }
     // verificação vertical
     // coluna 1
-    else if (b[1][0] == b[2][0]) {
+    if (b[1][0] == b[2][0]) {
         position[0] = 1;
         position[1] = gb.find(1 + '0');
         if (position[1] > 0) return position;
@@ -110,7 +103,7 @@ int * checkDanger(char b[][3], string gb) {
         if (position[1] > 0) return position;
     }
     /// coluna 2
-    else if (b[1][1] == b[2][1]) {
+    if (b[1][1] == b[2][1]) {
         position[0] = 2;
         position[1] = gb.find(2 + '0');
         if (position[1] > 0) return position;
@@ -126,7 +119,7 @@ int * checkDanger(char b[][3], string gb) {
         if (position[1] > 0) return position;
     }
     /// coluna 3
-    else if (b[1][2] == b[2][2]) {
+    if (b[1][2] == b[2][2]) {
         position[0] = 3;
         position[1] = gb.find(3 + '0');
         if (position[1] > 0) return position;
@@ -143,7 +136,7 @@ int * checkDanger(char b[][3], string gb) {
     }
     // verificação na diagonal
     // principal
-    else if (b[1][1] == b[2][2]) {
+    if (b[1][1] == b[2][2]) {
         position[0] = 1;
         position[1] = gb.find(1 + '0');
         if (position[1] > 0) return position;
@@ -159,7 +152,7 @@ int * checkDanger(char b[][3], string gb) {
         if (position[1] > 0) return position;
     }
     // secundaria
-    else if (b[1][1] == b[2][0]) {
+    if (b[1][1] == b[2][0]) {
         position[0] = 3;
         position[1] = gb.find(3 + '0');
         if (position[1] > 0) return position;
@@ -174,20 +167,18 @@ int * checkDanger(char b[][3], string gb) {
         position[1] = gb.find(7 + '0');
         if (position[1] > 0) return position;
     }
-    else return position;
+    position[0] = 0;
+    position[1] = 0;
+    return position;
 }
 
 int averageMove(char b[][3], string game_board) {
-
-    int * position = checkDanger(b, game_board);
-    int choice;
-    cout<<"Choice: "<<position[0]<<"\nPosition: "<<position[1]<<endl;
+    int * position = new int[2];
+    position = checkDanger(b, game_board);
 
     if (position[0] == 0) { // sem perigo de derrota/vitória
-        cout<<"No Danger"<<endl;
         position[1] = easyMove(b, game_board);
-    } else {
-        cout<<"DANGER!!"<<endl;
+    } else { // com perido de derrota/vitória
         executeMove(b, position[0], 'O');
     }
     return position[1];
@@ -200,7 +191,10 @@ int checkBoard(char b[][3]) {
     bool board_full = true;
     for (int i=0; i<3; i++){
         for (int j=0; j<3; j++){
+            // transforma char em int
             int aux = b[i][j] - '0';
+            // se houver algum numero ainda no tabuleiro
+            // ainda há jogadas disponíveis
             if (aux > 0 && aux < 10)
                 board_full = false;
         }
