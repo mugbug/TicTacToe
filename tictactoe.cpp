@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 
 using namespace std;
 
@@ -241,6 +242,39 @@ string generateBoard() {
     return game_board;
 }
 
+// retorna o status da partida: quem ganhou, se empatou ou se ainda não terminou
+bool getGameStatus(char winner, string game_board, int level) {
+    if (winner == 'X') { // player 1 venceu
+        system("clear || cls");
+        if (level == 0) {
+            cout<<"\n\t*************************\n\t* VITÓRIA DO JOGADOR 1! *\n\t*************************\n\n";
+        } else {
+            cout<<"\n\t*************************\n\t*      VOCÊ VENCEU!     *\n\t*************************\n\n";
+        }
+        cout<<game_board;
+        return true;
+    } else if (winner == 'O') { // player 2 venceu
+        system("clear || cls");
+        if (level == 0) {
+            cout<<"\n\t*************************\n\t* VITÓRIA DO JOGADOR 2! *\n\t*************************\n\n";
+        } else {
+            cout<<"\n\t*************************\n\t*  VOCÊ FOI DERROTADO!  *\n\t*************************\n\n";
+        }
+        cout<<game_board;
+        return true;
+    } else if (winner == 'E') { // empatou
+        system("clear || cls");
+        cout<<"\n\t*************************\n\t*        EMPATOU!       *\n\t*************************\n\n";
+        cout<<game_board;
+        return true;
+    } else {
+        // não terminou ainda, simplesmente limpa a tela
+        // e prossegue para a próxima rodada
+        system("clear || cls");
+        return false;
+    }
+}
+
 void playGame(int level) {
     // inicializa algumas variáveis
 
@@ -273,36 +307,18 @@ void playGame(int level) {
         // se estiver reproduz a jogada, se não emite um aviso
         int position = game_board.find(choice);
         if (position > 0) {
+            // atualiza o quadro da interface gráfica
             game_board[position] = player_symbol;
 
             // executa a jogada
             executeMove(aux_board, choice-'0', player_symbol);
-
+            
             // verifica se alguém ganhou ou se acabaram as jogadas
             char winner = checkBoard(aux_board);
-            if (winner == 'X') { // player 1 venceu
-                game_ended = true;
-                system("clear || cls");
-                cout<<"\n\t*************************\n\t* VITÓRIA DO JOGADOR 1! *\n\t*************************\n\n";
-                cout<<game_board;
-                break;
-            } else if (winner == 'O') { // player 2 venceu
-                game_ended = true;
-                system("clear || cls");
-                cout<<"\n\t*************************\n\t* VITÓRIA DO JOGADOR 2! *\n\t*************************\n\n";
-                cout<<game_board;
-                break;
-            } else if (winner == 'E') { // empatou
-                game_ended = true;
-                system("clear || cls");
-                cout<<"\n\t*************************\n\t*        EMPATOU!       *\n\t*************************\n\n";
-                cout<<game_board;
-                break;
-            } else {
-                // não terminou ainda, simplesmente limpa a tela
-                // e prossegue para a próxima rodada
-                system("clear || cls");
-            }
+
+            // dá um feedback do status do jogo na tela
+            game_ended = getGameStatus(winner, game_board, level);
+            if (game_ended) break;
 
             // atualiza as variáveis do próximo player
             if (level == 0) { // se for multiplayer troca o jogador
@@ -328,11 +344,16 @@ void playGame(int level) {
                         break;
                 }
             }
+            // verifica se alguém ganhou ou se acabaram as jogadas
+            winner = checkBoard(aux_board);
+
+            // dá um feedback do status do jogo na tela
+            game_ended = getGameStatus(winner, game_board, level);
+            if (game_ended) break;
         } else {
             system("clear || cls");
             cout<<"\n*** Opção inválida, tente escolher um quadro que ainda não foi marcado! ***\n\n";
         }
-        
     } while(!game_ended);
 }
 
@@ -371,6 +392,8 @@ void showMenu() {
 }
 
 int main() {
+    //system("color 2F");
+    setlocale(LC_ALL, "Portuguese");
     showMenu();
     return 0;
 }
